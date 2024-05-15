@@ -10,7 +10,7 @@
 from maze.maze3D import Maze3D
 from maze.util import Coordinates3D
 from generation.mazeGenerator import MazeGenerator
-
+import random
 
 class WilsonMazeGenerator(MazeGenerator):
     """
@@ -21,7 +21,9 @@ class WilsonMazeGenerator(MazeGenerator):
 
     def generateMaze(self, maze:Maze3D):
         # TODO: Implement this method for task A.
-        pass
+        
+        # Start by initialising all the cells
+        maze.initCells(True)
 
     
 		

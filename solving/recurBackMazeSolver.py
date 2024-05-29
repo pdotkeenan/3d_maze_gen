@@ -33,7 +33,7 @@ class RecurBackMazeSolver(MazeSolver):
 
 		# run recursive backtracking/DFS from starting cell
         stack : deque = deque()
-        stack.append(startCoord)
+        #stack.append(startCoord)
         currCell : Coordinates3D = startCoord 
         visited : set[Coordinates3D] = set([startCoord])
 
@@ -66,6 +66,8 @@ class RecurBackMazeSolver(MazeSolver):
             else:
 				# backtrack
                 currCell = stack.pop()
+                currCell = stack.pop()
+                stack.append(currCell)
                 self.solverPathAppend(currCell, True)
 
         # ensure we are currently at the exit

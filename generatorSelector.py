@@ -60,10 +60,15 @@ class GeneratorSelector:
         # TODO: Complete implementation for Task D, which also involves selection of appropriate generator.
         # The passed solver can be used to query the name of it, but you are not allowed to run the solver before
         # generating the maze.
+        
+        if solver.m_name == "recur":
+            generator = RecurBackMazeGenerator()
+        elif solver.m_name == "pledge":
+            generator = PrimMazeGenerator() or WilsonMazeGenerator()
 
         # TODO: Default option is to use Task D generator.  Note you do not have to use this, but this is provided in case
         # you wanted to build a custom generator, rather than select an existing one.
         # Remove / comment this out once if you not using this.
-        generator = TaskDMazeGenerator()
+        #generator = TaskDMazeGenerator()
 
         return generator

@@ -29,60 +29,53 @@ class WilsonMazeGenerator(MazeGenerator):
         self.path = {}
         
         self.directions = {
-            'UP': Coordinates3D(1, 0, 0),
-            'DOWN': Coordinates3D(-1, 0, 0),
-            'LEFT': Coordinates3D(0, -1, 0),
-            'RIGHT': Coordinates3D(0, 1, 0),
-            'FORWARD': Coordinates3D(0, 0, 1),
-            'BACKWARD': Coordinates3D(0, 0, -1)
+            'NORTH': Coordinates3D(0, 1, 0),
+            'NORTHEAST': Coordinates3D(1, 0, 0),
+            'EAST': Coordinates3D(0, 0, 1),
+            'SOUTH': Coordinates3D(0, -1, 0),
+            'SOUTHWEST': Coordinates3D(-1, 0, 0),   
+            'WEST': Coordinates3D(0, 0, -1),
         }
         
-        
     def generateMaze(self, maze: Maze3D):
-        
-        # Start by initializing all the cells
         maze.initCells(True)
-        
-        # Fill all unvisited cells
         self.unvisited = list(maze.allCells())
         
-        for cell in self.unvisited:
-            if maze.isBoundary(cell):
-                self.unvisited.remove(cell)
+        # Filter out any invalid (boundary cells) - this is important to avoid
+        # the assertion error for the isBoundary method
+        valid_unvisited = [u for u in self.unvisited if
+                            (u.getRow() >= 0 and u.getRow() < maze.rowNum(u.getLevel()) and
+                            u.getCol() >= 0 and u.getCol() < maze.colNum(u.getLevel()))]
         
         # Get a random starting cell
-        starting_cell = random.choice(self.unvisited)
+        starting_cell = random.choice(valid_unvisited)
         
         # Mark the current cell as visited and remove it from unvisited
         self.visited.append(starting_cell)
-        self.unvisited.remove(starting_cell)
+        valid_unvisited.remove(starting_cell)
         
-        while self.unvisited:
+        # Loop until all cells have been visited / our unvisited list is empty
+        while valid_unvisited:
             # Choose a random unvisited cell
-            first_cell = random.choice(self.unvisited)
+            first_cell = random.choice(valid_unvisited)
             current_cell = first_cell
             
-            while True:
+            # Loop until we reach a cell that we've already visited
+            while current_cell not in self.visited:
                 # Choose a random direction to travel in for the next cell
                 direction = random.choice(list(self.directions.values()))
                 next_cell = current_cell + direction
                 
-                # Get all neighbours of the current cell
+                # Get all valid neighbours of the current cell
                 neighbours = maze.neighbours(current_cell)
+                valid_neighbours = [neigh for neigh in neighbours if
+                                (neigh.getRow() >= 0 and neigh.getRow() < maze.rowNum(neigh.getLevel()) and
+                                 neigh.getCol() >= 0 and neigh.getCol() < maze.colNum(neigh.getLevel()))]
                 
-                # Choose a new direction if the next cell is not a neighbour (this stops some out of bounds cells, as the code below doesn't work)
-                while next_cell not in neighbours:                                         
+                # Choose a new direction if the next cell is not a neighbour
+                while next_cell not in valid_neighbours:                                         
                     direction = random.choice(list(self.directions.values()))                           
                     next_cell = current_cell + direction
-                    
-                # doing a boundary check here sometimes creates an infinite loop - code commented out below
-                # on the occasions it works, it doesn't do anything
-                # unsure what i've done wrong :( feedback would be appreciated
-                # non_boundary_neighbours = [n for n in neighbours if not maze.isBoundary(n)]
-                          
-                # while next_cell not in non_boundary_neighbours:                                         
-                #     direction = random.choice(list(self.directions.values()))                           
-                #     next_cell = current_cell + direction
                 
                 # Map the current cell to a list of 'direction' we're about to travel in
                 self.path[current_cell] = [direction]
@@ -100,19 +93,25 @@ class WilsonMazeGenerator(MazeGenerator):
             while True:
                 # Add and remove the current cell from the visited and unvisited lists
                 self.visited.append(current_cell)
-                self.unvisited.remove(current_cell)
+                valid_unvisited.remove(current_cell)
                 
-                # Get the most recent direction we've travelled in for a particular cell
+                # Get the most recent direction we've travelled in for a particular cell - this cuts out any loops that could've formed
                 most_recent_direction = self.path[current_cell][-1]       
+                
+                # Calculate the next cell to move to
                 next_cell = current_cell + most_recent_direction
                 
                 # Remove the wall between the current cell and the next cell
-                maze.removeWall(current_cell, next_cell)
+                if maze.isBoundary(next_cell) or maze.isBoundary(current_cell):
+                    self.path = {}
+                    break
+                else:
+                    maze.removeWall(current_cell, next_cell)
                 
                 # Move to the next cell
                 current_cell = next_cell
                 
-                # We've finished carving out this path, now reset
+                # We've finished carving out this path, now reset the path
                 if current_cell in self.visited:
                     self.path = {}
                     break

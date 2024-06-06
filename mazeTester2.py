@@ -12,7 +12,7 @@ import sys
 import time
 import json
 import random
-from typing import List
+from typing import List, Tuple
 
 from generatorSelector import GeneratorSelector
 from solverSelector import SolverSelector
@@ -171,7 +171,7 @@ if __name__ == '__main__':
 		#
 		# Solve maze
 		#
-		mazeEntrances: List[Coordinates3D]  = maze.getEntrances()		
+		mazeEntrances: List[Coordinates3D]  = maze.getEntrances()
 
 		# check if solver entrance index is within bounds (this is used for Tasks A, B and D)
 		if solverEntIndex != None and (solverEntIndex < 0 or solverEntIndex >= len(mazeEntrances)):
